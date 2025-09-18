@@ -20,6 +20,11 @@ const BIRD_HEIGHT = 24;
 const PIPE_WIDTH = 52;
 const PIPE_GAP = Math.max(canvas.height * 0.24, 120);
 
+// Otimização: Controla a taxa de quadros (FPS)
+const TARGET_FPS = 60;
+const FRAME_DURATION = 1000 / TARGET_FPS;
+let lastFrameTime = 0;
+
 let birdY, birdV, pipes, score, gameOver, started;
 
 // Carrega os sprites individuais
@@ -210,10 +215,17 @@ function draw() {
   }
 }
 
-function loop() {
-  update();
-  draw();
+function loop(currentTime) {
   requestAnimationFrame(loop);
+  
+  const elapsedTime = currentTime - lastFrameTime;
+
+  // Renderiza apenas se o tempo for suficiente para o FPS alvo
+  if (elapsedTime > FRAME_DURATION) {
+    lastFrameTime = currentTime - (elapsedTime % FRAME_DURATION);
+    update();
+    draw();
+  }
 }
 
 function flap() {
