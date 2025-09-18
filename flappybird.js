@@ -2,7 +2,6 @@ const canvas = document.getElementById('gameCanvas');
 const scoreDiv = document.getElementById('score');
 const restartBtn = document.getElementById('restartBtn');
 
-// Responsivo: ajusta o canvas ao container
 function resizeCanvas() {
   canvas.width = Math.min(420, window.innerWidth - 32);
   canvas.height = Math.min(600, Math.floor(window.innerHeight * 0.6));
@@ -12,7 +11,6 @@ window.addEventListener('resize', resizeCanvas);
 
 const ctx = canvas.getContext('2d');
 
-// Constantes do jogo
 const GRAVITY = 0.54;
 const FLAP = -8.5;
 const BIRD_WIDTH = 34;
@@ -20,14 +18,12 @@ const BIRD_HEIGHT = 24;
 const PIPE_WIDTH = 52;
 const PIPE_GAP = Math.max(canvas.height * 0.24, 120);
 
-// Otimização: Controla a taxa de quadros (FPS)
 const TARGET_FPS = 60;
 const FRAME_DURATION = 1000 / TARGET_FPS;
 let lastFrameTime = 0;
 
 let birdY, birdV, pipes, score, gameOver, started;
 
-// Carrega os sprites individuais
 const images = {};
 const assetsToLoad = [
   'background-day.png', 'background-night.png', 'base.png',
@@ -36,7 +32,6 @@ const assetsToLoad = [
   '0.png', '1.png', '2.png', '3.png', '4.png', '5.png', '6.png', '7.png', '8.png', '9.png'
 ];
 
-// Carrega os áudios
 const audios = {
   die: new Audio('audio/die.wav'),
   hit: new Audio('audio/hit.wav'),
@@ -80,7 +75,6 @@ function drawImage(image, x, y, width, height) {
   ctx.drawImage(image, x, y, width, height);
 }
 
-// Desenha o pássaro
 function drawBird(x, y) {
   const bird = birdFrames[birdIndex];
   if (bird) {
@@ -88,7 +82,6 @@ function drawBird(x, y) {
   }
 }
 
-// Gera um novo par de canos
 function createPipe() {
   const top = Math.random() * (canvas.height - PIPE_GAP - images['base'].height - 60) + 20;
   return { x: canvas.width, top, bottom: top + PIPE_GAP, passed: false };
@@ -113,14 +106,12 @@ function drawPipes() {
     const pipeHeightTop = pipe.top;
     const pipeHeightBottom = canvas.height - pipe.bottom;
 
-    // Cano de cima
     ctx.save();
     ctx.translate(pipe.x + PIPE_WIDTH / 2, pipeHeightTop);
     ctx.rotate(Math.PI);
     drawImage(pipeImage, -PIPE_WIDTH / 2, 0, PIPE_WIDTH, pipeImage.height);
     ctx.restore();
 
-    // Cano de baixo
     drawImage(pipeImage, pipe.x, pipe.bottom, PIPE_WIDTH, pipeImage.height);
   }
 }
@@ -142,7 +133,6 @@ function update() {
     birdV += GRAVITY;
     birdY += birdV;
 
-    // Atualiza a animação do pássaro
     frame++;
     if (frame % 5 === 0) {
       birdIndex = (birdIndex + 1) % birdFrames.length;
@@ -155,11 +145,9 @@ function update() {
       setTimeout(() => playAudio(audios.die), 500);
     }
 
-    // Move canos
     for (let pipe of pipes) {
       pipe.x -= 3.2;
 
-      // Colisão
       if (
         pipe.x < 60 + BIRD_WIDTH / 2 && pipe.x + PIPE_WIDTH > 60 - BIRD_WIDTH / 2 &&
         (birdY - BIRD_HEIGHT / 2 < pipe.top || birdY + BIRD_HEIGHT / 2 > pipe.bottom)
@@ -169,7 +157,6 @@ function update() {
         setTimeout(() => playAudio(audios.die), 500);
       }
 
-      // Score
       if (!pipe.passed && pipe.x + PIPE_WIDTH < 60 - BIRD_WIDTH / 2) {
         pipe.passed = true;
         score++;
@@ -178,10 +165,8 @@ function update() {
       }
     }
 
-    // Remove canos antigos
     if (pipes[0].x + PIPE_WIDTH < 0) pipes.shift();
 
-    // Adiciona novo cano
     if (pipes[pipes.length - 1].x < canvas.width - 200) pipes.push(createPipe());
   }
 }
@@ -189,7 +174,6 @@ function update() {
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // Desenha o fundo
   const backgroundImage = images['background-day'];
   if (backgroundImage) {
     drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
@@ -220,7 +204,6 @@ function loop(currentTime) {
   
   const elapsedTime = currentTime - lastFrameTime;
 
-  // Renderiza apenas se o tempo for suficiente para o FPS alvo
   if (elapsedTime > FRAME_DURATION) {
     lastFrameTime = currentTime - (elapsedTime % FRAME_DURATION);
     update();
